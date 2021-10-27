@@ -94,7 +94,7 @@ public abstract class ShellCommand {
         return configResult.all().get();
     }
 
-    protected Boolean findOption(List<String> words, String option) {
+    protected Boolean hasOption(List<String> words, String option) {
         OptionalInt optionPresent = IntStream.range(2, words.size())
                 .filter((i) -> words.get(i).equalsIgnoreCase(option))
                 .findFirst();

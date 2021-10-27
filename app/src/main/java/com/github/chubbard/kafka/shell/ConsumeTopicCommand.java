@@ -107,18 +107,18 @@ public class ConsumeTopicCommand extends ShellCommand {
         PrintStream output = new PrintStream( getTerminal().output(), true, getTerminal().encoding() );
 
         String topic = words.get( 1 );
-        boolean skipErrors = findOption( words, "skipErrors");
+        boolean skipErrors = hasOption( words, "skipErrors");
         String offset = getOption( words, "offset" ).orElse(null);
         Integer partitionNumber = getOption( words, "partition" ).map(Integer::parseInt).orElse(1);
         TopicPartition partition = new TopicPartition(topic, partitionNumber);
 
         BitSet printSet = new BitSet(6);
-        if( findOption(words, "print.timestamp") ) printSet.set(0);
-        if( findOption( words, "print.key") ) printSet.set(1);
-        if( findOption(words, "print.headers") ) printSet.set(2);
-        if( findOption( words, "print.offset") ) printSet.set(3);
-        if( findOption(words, "print.partition") ) printSet.set(4);
-        if( findOption(words, "print.value") ) printSet.set(5);
+        if( hasOption(words, "print.timestamp") ) printSet.set(0);
+        if( hasOption( words, "print.key") ) printSet.set(1);
+        if( hasOption(words, "print.headers") ) printSet.set(2);
+        if( hasOption( words, "print.offset") ) printSet.set(3);
+        if( hasOption(words, "print.partition") ) printSet.set(4);
+        if( hasOption(words, "print.value") ) printSet.set(5);
         if( printSet.isEmpty() ) printSet.set(5);
 
         Map<String,Object> formatConfig = new HashMap<>();
