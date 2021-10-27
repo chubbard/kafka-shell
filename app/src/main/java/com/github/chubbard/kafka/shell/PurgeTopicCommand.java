@@ -3,15 +3,18 @@ package com.github.chubbard.kafka.shell;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.config.TopicConfig;
+import org.jline.builtins.Completers;
 import org.jline.reader.Completer;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.StringsCompleter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static org.jline.builtins.Completers.TreeCompleter.node;
 
 public class PurgeTopicCommand extends ShellCommand {
 
@@ -28,7 +31,11 @@ public class PurgeTopicCommand extends ShellCommand {
 
     @Override
     public Completer getCompleter() {
-        return new StringsCompleter(this::getTopics);
+        return new Completers.TreeCompleter(
+                node("purge",
+                        node(new StringsCompleter(this::getTopics))
+                )
+        );
     }
 
     @Override
@@ -55,7 +62,7 @@ public class PurgeTopicCommand extends ShellCommand {
         );
         alterResult.all().get();
 
-        Thread.sleep( 1000 );
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1) );
 
         ConfigEntry cleanUpPolicy = configs.get( topicResource ).get( TopicConfig.CLEANUP_POLICY_CONFIG );
         ConfigEntry retentionMs = configs.get( topicResource ).get(TopicConfig.RETENTION_MS_CONFIG );

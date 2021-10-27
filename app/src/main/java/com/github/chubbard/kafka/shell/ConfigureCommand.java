@@ -45,20 +45,22 @@ public class ConfigureCommand extends ShellCommand {
 
     @Override
     public Completer getCompleter() {
-        return new Completers.TreeCompleter(node("config",
-                node("topic",
-                        node(new StringsCompleter( this::getTopics ),
-                                node(new EnumCompleter(AlterConfigOp.OpType.class),
-                                        node(new StringsCompleter( getTopicConfigs() ))
-                                )
-                        )
-                ),
-                node("broker",
-                        node(new StringsCompleter(this::getBrokers),
-                                node(new EnumCompleter(AlterConfigOp.OpType.class))
-                        )
+        return new Completers.TreeCompleter(
+                node("config",
+                    node("topic",
+                            node(new StringsCompleter( this::getTopics ),
+                                    node(new EnumCompleter(AlterConfigOp.OpType.class),
+                                            node(new StringsCompleter( getTopicConfigs() ))
+                                    )
+                            )
+                    ),
+                    node("broker",
+                            node(new StringsCompleter(this::getBrokers),
+                                    node(new EnumCompleter(AlterConfigOp.OpType.class))
+                            )
+                    )
                 )
-        ));
+        );
     }
 
     @Override

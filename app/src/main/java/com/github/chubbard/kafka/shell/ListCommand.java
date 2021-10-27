@@ -52,8 +52,7 @@ public class ListCommand extends ShellCommand {
     }
 
     private void listConsumerGroups() throws ExecutionException, InterruptedException {
-        ListConsumerGroupsResult result = getAdminClient().listConsumerGroups();
-        Collection<ConsumerGroupListing> groups = result.all().get();
+        Collection<ConsumerGroupListing> groups = getConsumerGroupListings();
         printf("Consumer Groups (%,d)%n", groups.size());
         println("-----------------------");
         groups.stream()

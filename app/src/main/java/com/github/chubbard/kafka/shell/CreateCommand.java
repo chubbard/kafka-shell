@@ -30,9 +30,11 @@ public class CreateCommand extends ShellCommand {
     @Override
     public Completer getCompleter() {
         return new Completers.TreeCompleter(
-                node("topic",
-                        node(NullCompleter.INSTANCE),
-                            node("partitions", "replication" )
+                node("create",
+                    node("topic",
+                            node(NullCompleter.INSTANCE),
+                                node("partitions", "replication" )
+                    )
                 )
         );
     }

@@ -4,8 +4,11 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.config.ConfigResource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jline.reader.Completer;
 import org.jline.reader.ParsedLine;
+import org.jline.reader.impl.completer.ArgumentCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class ShellCommand {
+
+    private static final Logger logger = LogManager.getLogger( ShellCommand.class );
 
     protected App app;
     protected String help;
@@ -52,7 +57,9 @@ public abstract class ShellCommand {
     }
 
     public Completer getCompleter() {
-        return new StringsCompleter( getCommand() );
+        ArgumentCompleter c = new ArgumentCompleter(new StringsCompleter( getCommand() ));
+        c.setStrictCommand(true);
+        return c;
     }
 
     public abstract void invoke(ParsedLine line) throws ExecutionException, InterruptedException;
@@ -67,6 +74,7 @@ public abstract class ShellCommand {
             ListTopicsResult res = getAdminClient().listTopics();
             return res.names().get();
         } catch( Exception e ) {
+            logger.error("Could not retrieve topics due to ", e);
             return Collections.emptyList();
         }
     }
@@ -76,6 +84,7 @@ public abstract class ShellCommand {
         try {
             return res.all().get().stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
         } catch(Exception e) {
+            logger.error("Could not retrieve consumer groups due to ", e);
             return Collections.emptyList();
         }
     }
@@ -85,6 +94,7 @@ public abstract class ShellCommand {
             Collection<Node> nodes = getAdminClient().describeCluster().nodes().get();
             return nodes.stream().map(Node::idString).collect(Collectors.toList());
         } catch( Exception e ) {
+            logger.error("Could not retrieve brokers due to ", e);
             return Collections.emptyList();
         }
     }
@@ -107,5 +117,10 @@ public abstract class ShellCommand {
                 .filter((i) -> i + 1 < words.size())
                 .mapToObj(i -> words.get(i+1) )
                 .findFirst();
+    }
+
+    protected Collection<ConsumerGroupListing> getConsumerGroupListings() throws InterruptedException, ExecutionException {
+        ListConsumerGroupsResult result = getAdminClient().listConsumerGroups();
+        return result.all().get();
     }
 }
