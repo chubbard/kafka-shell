@@ -5,6 +5,8 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.completer.AggregateCompleter;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class App {
 
-//    private static Logger logger = LoggerFactory.getLogger( App.class );
+    private static final Logger logger = LogManager.getLogger( App.class );
 
     AdminClient admin;
     Properties properties;
@@ -56,6 +58,7 @@ public class App {
 
     public void disconnect() {
         admin.close();
+        logger.info("Disconnected");
     }
 
     public Consumer<byte[],byte[]> getConsumer() {
@@ -72,11 +75,16 @@ public class App {
         if( kafkaClientDir.exists() ) {
             File clientConfig = new File(kafkaClientDir, profile + ".properties");
             if( clientConfig.exists() ) {
+                logger.info("Loading profile " + clientConfig.getAbsolutePath() );
                 try (Reader reader = new FileReader( clientConfig ) ) {
                     properties.load( reader );
                 } catch( IOException ioe ) {
                     terminal.writer().println( ioe.getMessage() );
                 }
+            } else {
+                logger.info("No configuration found using the default properties");
+                properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+                properties.put( AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT" );
             }
         }
     }
@@ -102,9 +110,14 @@ public class App {
                             break;
                         }
                     } catch (ExecutionException e) {
+                        logger.error("Error received", e);
                         terminal.writer().println("Error: " + e.getMessage());
                     } catch (InterruptedException e) {
+                        logger.warn("Shell interrupted. Exiting.");
                         exit();
+                    } catch( Throwable t ) {
+                        logger.error("Unexpected error", t);
+                        terminal.writer().println("Unexpected error: " + t.getMessage() );
                     }
                 }
             }
